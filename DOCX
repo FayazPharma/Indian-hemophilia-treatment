@@ -1,1 +1,386 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Report: Hemophilia Care in India</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutral Harmony -->
+    <!-- Application Structure Plan: The SPA is designed as a narrative journey for policymakers, clinicians, and patients. It moves from understanding the problem's scale to exploring solutions, addressing barriers, and finally, seeing a strategic roadmap. This thematic, dashboard-style structure was chosen over a linear report format to make complex data highly accessible and engaging. The flow is: 1) Hero with key stats to grab attention. 2) 'The Challenge' with interactive charts to visualize the core issues (under-diagnosis, prophylaxis gap). 3) 'Therapy Explorer' to compare treatments in a user-controlled tabbed interface. 4) 'Economic Impact' to clarify the financial burden and cost-effectiveness with charts. 5) 'Roadmap' to present strategies in a digestible accordion format. This non-linear, task-oriented design facilitates quicker understanding and synthesis of key information. -->
+    <!-- Visualization & Content Choices: 
+        - Under-diagnosis (Report Info) -> Goal: Inform/Impact -> Viz: Donut Chart (Chart.js) -> Interaction: Hover for details -> Justification: Immediately shows the massive 80% 'hidden' population, a critical report finding.
+        - Prophylaxis Gap (Report Info) -> Goal: Compare -> Viz: Bar Chart (Chart.js) -> Interaction: Hover for values -> Justification: Starkly contrasts India's low adoption (~4%) with global standards, highlighting a key care gap.
+        - Therapy Comparison (Report Info) -> Goal: Organize/Inform -> Viz: Tabbed Content (HTML/JS) -> Interaction: Click tabs -> Justification: Breaks down complex clinical data into manageable, user-selected categories, preventing information overload.
+        - Cost Comparison (Report Info) -> Goal: Compare -> Viz: Bar Chart (Chart.js) -> Interaction: Hover for INR values -> Justification: Visually demonstrates the cost-effectiveness of newer therapies like low-dose Emicizumab, a key point for payers.
+        - Strategic Solutions (Report Info) -> Goal: Organize/Inform -> Viz: Accordion (HTML/JS) -> Interaction: Click to expand -> Justification: Presents dense policy recommendations in a clean, structured, and browsable format.
+        - All choices use Chart.js (Canvas) or structured HTML/CSS, adhering to the NO SVG/Mermaid constraint. The interactive design supports the application's goal of facilitating understanding. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .chart-container { position: relative; width: 100%; max-width: 500px; margin-left: auto; margin-right: auto; height: 320px; max-height: 400px; }
+        @media (min-width: 768px) { .chart-container { height: 350px; } }
+        .nav-link { transition: all 0.3s; }
+        .nav-link.active { color: #0f766e; border-bottom-color: #0f766e; }
+        .tab-btn.active { background-color: #0d9488; color: white; }
+        .tab-btn { transition: background-color 0.3s, color 0.3s; }
+        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.5s ease-in-out; }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-800">
+ 
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-xl font-bold text-teal-700">Hemophilia in India</h1>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#challenge" class="nav-link text-stone-600 hover:text-teal-600 px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent">The Challenge</a>
+                        <a href="#therapies" class="nav-link text-stone-600 hover:text-teal-600 px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent">Therapies</a>
+                        <a href="#economics" class="nav-link text-stone-600 hover:text-teal-600 px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent">Economics</a>
+                        <a href="#roadmap" class="nav-link text-stone-600 hover:text-teal-600 px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent">Roadmap</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+ 
+    <main>
+        <section id="hero" class="bg-white py-20 sm:py-24">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <p class="text-base font-semibold text-teal-600">A Reality Check for Clinicians & Payers</p>
+                <h2 class="mt-2 text-4xl font-bold tracking-tight text-stone-900 sm:text-5xl">Navigating the Future of Hemophilia Care in India</h2>
+                <p class="mt-6 max-w-3xl mx-auto text-lg leading-8 text-stone-600">India faces a critical healthcare challenge with the world's second-largest hemophilia population, yet the vast majority remain undiagnosed and untreated. This interactive report explores the current landscape, innovative therapies, and strategic pathways to provide equitable, sustainable care.</p>
+            </div>
+        </section>
+ 
+        <section id="challenge" class="py-20 sm:py-24">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h3 class="text-3xl font-bold tracking-tight text-stone-900 sm:text-4xl">The Scale of the Challenge</h3>
+                    <p class="mt-4 max-w-2xl mx-auto text-lg leading-8 text-stone-600">The core of India's hemophilia problem lies in two areas: a massive gap in diagnosis and a profound lag in adopting the global standard of care. These charts illustrate the stark reality of the situation on the ground.</p>
+                </div>
+ 
+                <div class="mt-16 grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16 items-center">
+                    <div class="flex flex-col items-center">
+                        <h4 class="text-xl font-semibold text-center mb-4">The Hidden Epidemic: Under-Diagnosis</h4>
+                        <p class="text-center text-stone-600 mb-6 max-w-md">An estimated 80% of individuals with hemophilia in India are not officially registered, meaning they live without a formal diagnosis and access to care. This 'hidden' population highlights a fundamental failure in awareness and diagnostic infrastructure.</p>
+                        <div class="chart-container">
+                            <canvas id="diagnosisChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <h4 class="text-xl font-semibold text-center mb-4">The Prophylaxis Gap: A Lag in Care</h4>
+                         <p class="text-center text-stone-600 mb-6 max-w-md">Prophylaxis (preventative treatment) is the global standard of care, dramatically reducing bleeds and long-term joint damage. India's adoption rate is critically low compared to global benchmarks, perpetuating a cycle of disability.</p>
+                        <div class="chart-container">
+                            <canvas id="prophylaxisChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="therapies" class="py-20 sm:py-24 bg-white">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h3 class="text-3xl font-bold tracking-tight text-stone-900 sm:text-4xl">The Evolving Therapeutic Landscape</h3>
+                    <p class="mt-4 max-w-3xl mx-auto text-lg leading-8 text-stone-600">Hemophilia treatment has evolved from basic factor replacement to highly advanced non-factor and gene therapies. Understanding the options is key to developing a realistic strategy for India. Click through the tabs below to explore each category.</p>
+                </div>
+                
+                <div class="mt-12 max-w-4xl mx-auto">
+                    <div class="mb-6 flex justify-center border-b border-stone-200">
+                        <button class="tab-btn px-4 py-3 text-sm sm:text-base font-medium text-stone-500 hover:bg-stone-100" data-tab="factor">Factor Replacement</button>
+                        <button class="tab-btn px-4 py-3 text-sm sm:text-base font-medium text-stone-500 hover:bg-stone-100" data-tab="non-factor">Non-Factor Therapies</button>
+                        <button class="tab-btn px-4 py-3 text-sm sm:text-base font-medium text-stone-500 hover:bg-stone-100" data-tab="gene">Gene Therapy</button>
+                    </div>
+ 
+                    <div id="therapy-content" class="p-2">
+                        <!-- Content will be dynamically inserted here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+ 
+        <section id="economics" class="py-20 sm:py-24">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h3 class="text-3xl font-bold tracking-tight text-stone-900 sm:text-4xl">The Economic Equation</h3>
+                    <p class="mt-4 max-w-3xl mx-auto text-lg leading-8 text-stone-600">The cost of therapy is the single largest barrier to care in India, leading to catastrophic out-of-pocket expenses for families. However, newer, more effective therapies, while expensive upfront, are proving to be more cost-effective in the long run.</p>
+                </div>
+                
+                <div class="mt-16 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+                    <div>
+                        <h4 class="text-xl font-semibold mb-4">Comparative Annual Therapy Costs</h4>
+                        <p class="text-stone-600 mb-6">This chart compares the estimated annual costs of different prophylactic regimens in India. It highlights that low-dose Emicizumab, a highly effective non-factor therapy, can be more affordable than traditional factor replacement, presenting a viable path for payers.</p>
+                        <div class="chart-container">
+                            <canvas id="costChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="space-y-6">
+                        <div class="bg-white p-6 rounded-lg shadow-sm">
+                            <h5 class="font-semibold text-lg text-teal-700">Catastrophic Family Costs</h5>
+                            <p class="mt-2 text-stone-600">Studies show that adequate treatment for a year's bleeds could cost <strong>21 to 314 times</strong> a family's monthly income, pushing nearly 70% of households into catastrophic expenditure. This forces families to choose between financial ruin and their child's health.</p>
+                        </div>
+                         <div class="bg-white p-6 rounded-lg shadow-sm">
+                            <h5 class="font-semibold text-lg text-teal-700">The Role of Government Schemes</h5>
+                            <p class="mt-2 text-stone-600">Schemes like PM-JAY and state-level initiatives (e.g., Kerala's "Aashadhara") are critical. Kerala's program, which provides free Emicizumab to children, serves as a powerful model for how government intervention can make advanced therapies accessible.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+ 
+        <section id="roadmap" class="py-20 sm:py-24 bg-white">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                 <div class="text-center">
+                    <h3 class="text-3xl font-bold tracking-tight text-stone-900 sm:text-4xl">A Strategic Roadmap for India</h3>
+                    <p class="mt-4 max-w-3xl mx-auto text-lg leading-8 text-stone-600">Improving hemophilia care requires a multi-pronged strategy involving policy, infrastructure, and awareness. Below are the key pillars for building a sustainable and equitable system. Click on each pillar to learn more.</p>
+                </div>
+                
+                <div id="accordion-container" class="mt-12 max-w-3xl mx-auto space-y-4">
+                    <!-- Accordion items will be dynamically inserted here -->
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <footer class="bg-stone-800 text-stone-300 py-8">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm">
+            <p>&copy; 2024 Interactive Hemophilia Report. Data synthesized from the review "Realistic Implementation of Hemophilia Therapies in India: A Review for Clinicians and Payers".</p>
+            <p class="mt-2">Authored by Mohammed Fayaz S. Contact: fayazs.pharma@gmail.com</p>
+            <p class="mt-2">This application is for informational purposes only and does not constitute medical advice.</p>
+        </div>
+    </footer>
+ 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+ 
+    const diagnosisData = {
+        labels: ['Undiagnosed (Est.)', 'Registered Cases'],
+        datasets: [{
+            data: [80, 20],
+            backgroundColor: ['#f59e0b', '#0d9488'],
+            borderColor: '#f9fafb',
+            borderWidth: 2,
+            hoverOffset: 4
+        }]
+    };
+ 
+    const prophylaxisData = {
+        labels: ['India', 'Other Developing Countries', 'Developed Countries'],
+        datasets: [{
+            label: 'Prophylaxis Adoption Rate (%)',
+            data: [4, 20, 85], 
+            backgroundColor: ['#f59e0b', '#fbbf24', '#0d9488'],
+            borderColor: ['#d97706', '#d97706', '#0f766e'],
+            borderWidth: 1
+        }]
+    };
+    
+    const costData = {
+        labels: ['Low-Dose Factor VIII Prophylaxis', 'Low-Dose Emicizumab Prophylaxis', 'Standard-Dose Emicizumab Prophylaxis'],
+        datasets: [{
+            label: 'Estimated Annual Cost (INR Lakhs)',
+            data: [9.5, 10, 26], 
+            backgroundColor: ['#fbbf24', '#0d9488', '#f59e0b'],
+            borderWidth: 1,
+            borderRadius: 4
+        }]
+    };
+ 
+    const therapyContentData = {
+        'factor': {
+            title: 'Traditional Factor Replacement Therapy',
+            content: `
+                <p class="text-stone-600 mb-4">This has been the cornerstone of care, involving intravenous (IV) infusion of concentrates to replace the missing clotting factor (FVIII or FIX). Extended Half-Life (EHL) products reduce infusion frequency.</p>
+                <ul class="space-y-3">
+                    <li class="flex items-start"><span class="text-teal-500 font-bold mr-2 mt-1">&#10003;</span><span><strong>Advantage:</strong> Direct replacement of the missing factor, a well-established treatment model.</span></li>
+                    <li class="flex items-start"><span class="text-orange-500 font-bold mr-2 mt-1">&#10007;</span><span><strong>Challenge:</strong> High risk of developing inhibitors (antibodies) that render treatment ineffective, requires frequent IV access, and can be costly.</span></li>
+                </ul>`
+        },
+        'non-factor': {
+            title: 'Non-Factor Replacement Therapies',
+            content: `
+                <p class="text-stone-600 mb-4">These innovative drugs work differently. Emicizumab, for example, mimics the function of FVIII instead of replacing it. They represent a major leap forward in managing hemophilia, especially for patients with inhibitors.</p>
+                <ul class="space-y-3">
+                    <li class="flex items-start"><span class="text-teal-500 font-bold mr-2 mt-1">&#10003;</span><span><strong>Advantage:</strong> Highly effective even in patients with inhibitors, subcutaneous (under the skin) self-administration, reduced treatment burden and improved quality of life.</span></li>
+                    <li class="flex items-start"><span class="text-orange-500 font-bold mr-2 mt-1">&#10007;</span><span><strong>Challenge:</strong> High upfront cost (though proven cost-effective long-term), requires specialized monitoring tests.</span></li>
+                </ul>`
+        },
+        'gene': {
+            title: 'Gene Therapy',
+            content: `
+                <p class="text-stone-600 mb-4">The ultimate goal: a one-time treatment that introduces a functional gene, allowing the patient's body to produce its own clotting factor. This offers the potential for a functional cure, eliminating the need for lifelong infusions.</p>
+                 <ul class="space-y-3">
+                    <li class="flex items-start"><span class="text-teal-500 font-bold mr-2 mt-1">&#10003;</span><span><strong>Advantage:</strong> Potential one-time functional cure, zero bleeding rates in trials, and transformative quality of life improvement. Successful trials are underway in India (CMC Vellore).</span></li>
+                    <li class="flex items-start"><span class="text-orange-500 font-bold mr-2 mt-1">&#10007;</span><span><strong>Challenge:</strong> Prohibitively high upfront cost (dubbed "world's most expensive drug"), uncertainty about long-term durability, complex regulatory pathway.</span></li>
+                </ul>`
+        }
+    };
+    
+    const accordionData = [
+        {
+            title: '1. Policy & Prophylaxis Integration',
+            content: 'The primary goal is to establish prophylaxis as the standard of care. This requires explicit inclusion in state health schemes, centralized procurement to negotiate bulk discounts on therapies, and prioritizing high-risk patient groups (children, high bleeders) to maximize impact and cost-effectiveness.'
+        },
+        {
+            title: '2. Regulatory & Advanced Therapy Access',
+            content: 'To bring in novel treatments like gene therapy, India needs a streamlined but safe regulatory process. This includes creating expedited pathways for rare disease drugs, accepting robust global trial data to reduce local trial burden, and continuing to fund indigenous research (like the CMC Vellore trial) to develop more affordable solutions.'
+        },
+        {
+            title: '3. Public-Private Partnerships (PPPs) & NGOs',
+            content: 'Collaboration is key to bridging funding and knowledge gaps. Successful models include factor donation programs (WFH, HFI), CSR funding from public sector companies for treatment and diagnosis, and "twinning programs" that pair Indian hospitals with international centers to elevate the standard of care.'
+        },
+        {
+            title: '4. Decentralization of Care & Telehealth',
+            content: 'Care cannot remain concentrated in urban tertiary centers. A "hub-and-spoke" model is needed, empowering district hospitals (spokes) to handle routine care while tertiary centers (hubs) manage complex cases and provide training. Telehealth and digital health tools are crucial for overcoming geographical barriers for remote consultations and monitoring.'
+        },
+        {
+            title: '5. Awareness & Diagnostic Capabilities',
+            content: 'Addressing the 80% under-diagnosis rate is fundamental. This requires large-scale public awareness campaigns, mandatory training for healthcare professionals to spot early signs, and investment in standardized coagulation labs at the district level. A robust national patient registry is vital for data-driven policy and resource allocation.'
+        }
+    ];
+ 
+    function createChart(ctx, type, data, options) {
+        if (ctx) {
+            new Chart(ctx, { type, data, options });
+        }
+    }
+ 
+    const commonOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    font: { size: 12 }
+                }
+            },
+            tooltip: {
+                backgroundColor: '#334155',
+                titleFont: { size: 14, weight: 'bold' },
+                bodyFont: { size: 12 },
+                padding: 10,
+                cornerRadius: 4
+            }
+        }
+    };
+ 
+    createChart(
+        document.getElementById('diagnosisChart')?.getContext('2d'),
+        'doughnut',
+        diagnosisData,
+        { ...commonOptions }
+    );
+ 
+    createChart(
+        document.getElementById('prophylaxisChart')?.getContext('2d'),
+        'bar',
+        prophylaxisData,
+        { ...commonOptions, plugins: { ...commonOptions.plugins, legend: { display: false }}, scales: { y: { beginAtZero: true, grid: { color: '#e5e7eb' }, ticks: { callback: value => value + '%' } } } }
+    );
+    
+    createChart(
+        document.getElementById('costChart')?.getContext('2d'),
+        'bar',
+        costData,
+        { ...commonOptions, indexAxis: 'y', plugins: { ...commonOptions.plugins, legend: { display: false }}, scales: { x: { beginAtZero: true, grid: { color: '#e5e7eb' }, ticks: { callback: value => `₹${value}L` } } } }
+    );
+    
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const therapyContentContainer = document.getElementById('therapy-content');
+    
+    function updateTherapyContent(tab) {
+        const data = therapyContentData[tab];
+        if (data) {
+             therapyContentContainer.innerHTML = `
+                <div class="bg-stone-100 p-6 rounded-lg">
+                     <h5 class="text-xl font-bold text-stone-800 mb-3">${data.title}</h5>
+                     ${data.content}
+                </div>
+            `;
+        }
+    }
+ 
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            updateTherapyContent(button.dataset.tab);
+        });
+    });
+ 
+    if (tabButtons.length > 0) {
+        tabButtons[1].click();
+    }
+    
+    const accordionContainer = document.getElementById('accordion-container');
+    accordionData.forEach((item, index) => {
+        const accordionItem = document.createElement('div');
+        accordionItem.className = 'border border-stone-200 rounded-lg';
+        accordionItem.innerHTML = `
+            <button class="accordion-header w-full flex justify-between items-center text-left p-4 bg-stone-100 hover:bg-stone-200 transition-colors">
+                <span class="font-semibold text-teal-800">${item.title}</span>
+                <span class="accordion-icon text-teal-600 font-bold text-xl transition-transform transform">+</span>
+            </button>
+            <div class="accordion-content">
+                <p class="p-4 text-stone-600">${item.content}</p>
+            </div>
+        `;
+        accordionContainer.appendChild(accordionItem);
+    });
+    
+    document.querySelectorAll('.accordion-header').forEach(header => {
+        header.addEventListener('click', () => {
+            const content = header.nextElementSibling;
+            const icon = header.querySelector('.accordion-icon');
+            
+            if (content.style.maxHeight) {
+                content.style.maxHeight = null;
+                icon.textContent = '+';
+                icon.classList.remove('rotate-45');
+            } else {
+                document.querySelectorAll('.accordion-content').forEach(c => c.style.maxHeight = null);
+                document.querySelectorAll('.accordion-icon').forEach(i => {
+                    i.textContent = '+';
+                    i.classList.remove('rotate-45');
+                });
+                
+                content.style.maxHeight = content.scrollHeight + "px";
+                icon.textContent = '−';
+            }
+        });
+    });
+ 
+    const navLinks = document.querySelectorAll('.nav-link');
+    const sections = document.querySelectorAll('section');
+ 
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                navLinks.forEach(link => {
+                    link.classList.toggle('active', link.getAttribute('href').substring(1) === entry.target.id);
+                });
+            }
+        });
+    }, { rootMargin: '-50% 0px -50% 0px' });
+ 
+    sections.forEach(section => {
+        if(section.id) {
+           observer.observe(section);
+        }
+    });
+});
+</script>
+ 
+</body>
+</html>
+ 
+ 
 
